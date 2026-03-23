@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -12,7 +12,10 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Lysto</Text>
+      <View style={styles.brandRow}>
+        <Image source={require('../assets/images/logo.jpg')} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.title}>Lysto</Text>
+      </View>
       <Text style={styles.subtitle}>Sign in to start planning your groceries.</Text>
 
       <TextInput
@@ -45,7 +48,7 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8faf5',
+    backgroundColor: '#f8eddb',
     paddingHorizontal: 20,
     justifyContent: 'center',
     gap: 12,
@@ -55,6 +58,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#23402b',
   },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logo: {
+    width: 36,
+    height: 36,
+  },
   subtitle: {
     fontSize: 15,
     color: '#4b5f50',
@@ -63,21 +75,21 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d6e2d5',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8eddb',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
   },
   primaryButton: {
-    backgroundColor: '#2f7a43',
+    backgroundColor: '#f8eddb',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 4,
   },
   primaryButtonText: {
-    color: '#ffffff',
+    color: '#2f7a43',
     fontSize: 16,
     fontWeight: '700',
   },
