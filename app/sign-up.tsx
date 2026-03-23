@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function SignUpScreen() {
   const [name, setName] = useState('');
@@ -13,6 +13,10 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.brandRow}>
+        <Image source={require('../assets/images/logo.jpg')} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.brandName}>Lysto</Text>
+      </View>
       <Text style={styles.title}>Create account</Text>
       <Text style={styles.subtitle}>Set up your grocery list starter profile.</Text>
 
@@ -60,6 +64,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
+    fontWeight: '800',
+    color: '#23402b',
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
+  logo: {
+    width: 36,
+    height: 36,
+  },
+  brandName: {
+    fontSize: 32,
     fontWeight: '800',
     color: '#23402b',
   },
