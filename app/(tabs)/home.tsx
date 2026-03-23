@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { BottomNavBar, CategoryChip, ProductCard } from '@/components/lysto';
+import { CategoryChip, ProductCard } from '@/components/lysto';
 import { categories } from '@/constants/catalog';
 import { lystoColors } from '@/constants/lysto-theme';
 import { useList } from '@/context/list-context';
@@ -165,8 +165,6 @@ export default function HomeScreen() {
           </Pressable>
         </View>
       )}
-
-      <BottomNavBar activeTab="home" />
     </SafeAreaView>
   );
 }

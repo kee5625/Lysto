@@ -1,4 +1,4 @@
-import { BottomNavBar, ListItemRow } from '@/components/lysto';
+import { ListItemRow } from '@/components/lysto';
 import { useList } from '@/context/list-context';
 import { lystoColors } from '@/constants/lysto-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -89,8 +89,6 @@ export default function MyListScreen() {
           <Text style={styles.shareMeta}>{totalDistinctItems} distinct items ready to share</Text>
         </View>
       </ScrollView>
-
-      <BottomNavBar activeTab="my-list" />
     </SafeAreaView>
   );
 }

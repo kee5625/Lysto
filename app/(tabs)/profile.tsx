@@ -1,13 +1,11 @@
-import { BottomNavBar } from '@/components/lysto';
 import { lystoColors } from '@/constants/lysto-theme';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function SavedScreen() {
+export default function ProfileScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Saved</Text>
+      <Text style={styles.title}>Profile</Text>
       <Text style={styles.subtitle}>Batch 4 can refine this screen if needed.</Text>
-      <BottomNavBar activeTab="saved" />
     </View>
   );
 }

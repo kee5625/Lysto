@@ -7,6 +7,7 @@ export type BottomTabKey = 'home' | 'search' | 'my-list' | 'saved' | 'profile';
 
 type BottomNavBarProps = {
   activeTab: BottomTabKey;
+  onTabPress?: (tab: BottomTabKey) => void;
 };
 
 const tabs: {
@@ -22,7 +23,7 @@ const tabs: {
   { key: 'profile', label: 'Profile', icon: 'person-outline', href: '/profile' as Href },
 ];
 
-export function BottomNavBar({ activeTab }: BottomNavBarProps) {
+export function BottomNavBar({ activeTab, onTabPress }: BottomNavBarProps) {
   return (
     <View style={styles.container}>
       {tabs.map((tab) => {
@@ -34,7 +35,14 @@ export function BottomNavBar({ activeTab }: BottomNavBarProps) {
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
             accessibilityLabel={`${tab.label} tab`}
-            onPress={() => router.replace(tab.href)}
+            onPress={() => {
+              if (onTabPress) {
+                onTabPress(tab.key);
+                return;
+              }
+
+              router.replace(tab.href);
+            }}
             style={[styles.tab, active && styles.tabActive]}
           >
             <MaterialIcons
