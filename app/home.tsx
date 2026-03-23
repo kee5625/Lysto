@@ -46,23 +46,25 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.topHeader}>
-        <View style={styles.headerLeft}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.iconRow}>
           <Image
             source={{
               uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCOBdY9vPIAPlA0FVG6bQYzgWw8C38Li4Im92GR3H-MxBnhha0yxfZftMIIiXKu5Kr1ZJshUmmDq9zmgpbNbkNFiks8ffrtWTIPSm3LnmCO9SkfDRlABM4fQXWrwOed2N3cuTX4hLHyY-NQr7shA0WQSRfD-ewGwVYJIOQbOENnDDzqXXnzu0C83QMZKfahYs0CIvXgcue6dWNBOyYuOTYVUK4QxHdoCzxeFNNAMwKS3ptjdCtyUhOaYPpy9emrb-JmwCThsyq8Ohvh',
             }}
             style={styles.avatar}
+            accessibilityLabel="Your profile avatar"
           />
-          <Text style={styles.brand}>Harvest & Hearth</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Notifications"
+            accessibilityHint="Opens recent notifications"
+            style={styles.notificationButton}
+          >
+            <MaterialIcons name="notifications-none" size={22} color={lystoColors.primary} />
+          </Pressable>
         </View>
 
-        <Pressable style={styles.notificationButton}>
-          <MaterialIcons name="notifications-none" size={22} color={lystoColors.primary} />
-        </Pressable>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.greetingBlock}>
           <Text style={styles.greeting}>Good morning,</Text>
           <Text style={styles.greetingAccent}>Ready to build ur list?</Text>
@@ -81,12 +83,22 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.actionRow}>
-            <Pressable style={styles.actionSecondaryButton}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="In progress lists"
+              accessibilityHint="Shows lists you are currently working on"
+              style={styles.actionSecondaryButton}
+            >
               <MaterialIcons name="pending-actions" size={20} color="#486e34" />
               <Text style={styles.actionSecondaryText}>In Progress</Text>
             </Pressable>
 
-            <Pressable style={styles.actionPrimaryButton}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Create new list"
+              accessibilityHint="Starts a new grocery list"
+              style={styles.actionPrimaryButton}
+            >
               <MaterialIcons name="add-circle" size={20} color={lystoColors.white} />
               <Text style={styles.actionPrimaryText}>New List</Text>
             </Pressable>
@@ -133,7 +145,13 @@ export default function HomeScreen() {
 
       {totalUnits > 0 && (
         <View style={styles.floatingWrap}>
-          <Pressable onPress={() => router.push('/my-list' as Href)} style={styles.floatingButton}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="View your list"
+            accessibilityHint="Opens the My List page"
+            onPress={() => router.push('/my-list' as Href)}
+            style={styles.floatingButton}
+          >
             <View style={styles.floatingLeft}>
               <View style={styles.floatingBadge}>
                 <Text style={styles.floatingBadgeText}>{totalUnits}</Text>
@@ -158,26 +176,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: lystoColors.surface,
   },
-  topHeader: {
-    position: 'absolute',
-    top: 8,
-    left: 16,
-    right: 16,
-    zIndex: 10,
-    backgroundColor: 'rgba(255, 248, 241, 0.85)',
-    borderRadius: 24,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#ece1cf',
+  iconRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
   },
   avatar: {
     width: 40,
@@ -185,12 +187,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     borderColor: '#b4f398',
-  },
-  brand: {
-    color: lystoColors.primary,
-    fontSize: 24,
-    fontWeight: '600',
-    letterSpacing: -0.3,
   },
   notificationButton: {
     width: 40,
@@ -200,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scrollContent: {
-    paddingTop: 104,
+    paddingTop: 16,
     paddingBottom: 172,
     paddingHorizontal: 16,
     gap: 18,

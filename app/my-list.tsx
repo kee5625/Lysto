@@ -1,4 +1,4 @@
-import { BottomNavBar, ListItemRow, TopAppBar } from '@/components/lysto';
+import { BottomNavBar, ListItemRow } from '@/components/lysto';
 import { useList } from '@/context/list-context';
 import { lystoColors } from '@/constants/lysto-theme';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -24,14 +24,6 @@ export default function MyListScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.topBarWrap}>
-        <TopAppBar
-          title="Harvest & Hearth"
-          leftIcon="menu"
-          avatarUri="https://lh3.googleusercontent.com/aida-public/AB6AXuCTC3MbIaxDaZGD8fCQXDS3rC1eexXUiKQxC0gHbb8htAyBawc9cL9UeDI9iMOLOmfXdPGNEsh6DjPiPEbH3MecF3nDbUuT8mXp97IkDSYsesQMUU0Fw4oLo1QMmvak8V2k6gwKljzUUXV2HafXEdAsWKGd_-2p1fF_MctQBKpVHkO9xtvn22HHQRJ0cON7pZqpo_03epw2vFXK6ttzlS62J6h9bSFmcXR1yZ7W30tQlLesNsE-eUVP9UkQ9iC0XgMT5_98XQmBRNX0"
-        />
-      </View>
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.heroBlock}>
           <Text style={styles.heroEyebrow}>Current Selection</Text>
@@ -84,7 +76,13 @@ export default function MyListScreen() {
         )}
 
         <View style={styles.shareWrap}>
-          <Pressable onPress={handleShare} style={styles.shareButton}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Share list via WhatsApp"
+            accessibilityHint="Opens WhatsApp with your current list message"
+            onPress={handleShare}
+            style={styles.shareButton}
+          >
             <MaterialIcons name="share" size={20} color={lystoColors.white} />
             <Text style={styles.shareText}>Share via WhatsApp</Text>
           </Pressable>
@@ -102,33 +100,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: lystoColors.surface,
   },
-  topBarWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    top: 8,
-    zIndex: 10,
-    opacity: 0.98,
-  },
   scrollContent: {
-    paddingTop: 108,
+    paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: 132,
-    gap: 36,
+    gap: 28,
   },
   heroBlock: {
     gap: 6,
   },
   heroEyebrow: {
-    fontSize: 11,
+    fontSize: 10,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: lystoColors.primary,
     fontWeight: '700',
   },
   heroTitle: {
-    fontSize: 58,
-    lineHeight: 58,
+    fontSize: 42,
+    lineHeight: 44,
     fontWeight: '500',
     color: lystoColors.text,
   },
@@ -142,18 +132,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sectionTitle: {
-    fontSize: 34,
-    lineHeight: 36,
+    fontSize: 26,
+    lineHeight: 28,
     fontWeight: '600',
     color: lystoColors.text,
   },
   sectionCount: {
-    fontSize: 14,
+    fontSize: 12,
     color: lystoColors.textMuted,
     fontWeight: '500',
   },
   sectionItems: {
-    gap: 16,
+    gap: 12,
   },
   emptyState: {
     alignItems: 'center',
@@ -167,12 +157,12 @@ const styles = StyleSheet.create({
     paddingVertical: 26,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: lystoColors.text,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: lystoColors.textMuted,
     textAlign: 'center',
   },
@@ -182,7 +172,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   shareButton: {
-    minHeight: 62,
+    minHeight: 56,
     borderRadius: 999,
     backgroundColor: lystoColors.primary,
     width: '100%',
@@ -194,11 +184,11 @@ const styles = StyleSheet.create({
   },
   shareText: {
     color: lystoColors.white,
-    fontSize: 19,
+    fontSize: 16,
     fontWeight: '700',
   },
   shareMeta: {
-    fontSize: 12,
+    fontSize: 11,
     color: lystoColors.textMuted,
   },
 });
