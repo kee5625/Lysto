@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router } from "expo-router";
+import { useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
+} from "react-native";
 
 type GroceryItem = {
   id: string;
@@ -16,16 +16,19 @@ type GroceryItem = {
 };
 
 const starterItems: GroceryItem[] = [
-  { id: '1', label: 'Milk', checked: false },
-  { id: '2', label: 'Bread', checked: true },
-  { id: '3', label: 'Eggs', checked: false },
+  { id: "1", label: "Milk", checked: false },
+  { id: "2", label: "Bread", checked: true },
+  { id: "3", label: "Eggs", checked: false },
 ];
 
 export default function HomeScreen() {
-  const [newItem, setNewItem] = useState('');
+  const [newItem, setNewItem] = useState("");
   const [items, setItems] = useState<GroceryItem[]>(starterItems);
 
-  const pendingCount = useMemo(() => items.filter((item) => !item.checked).length, [items]);
+  const pendingCount = useMemo(
+    () => items.filter((item) => !item.checked).length,
+    [items],
+  );
 
   const handleAddItem = () => {
     const nextLabel = newItem.trim();
@@ -38,7 +41,7 @@ export default function HomeScreen() {
       ...prevItems,
       { id: Date.now().toString(), label: nextLabel, checked: false },
     ]);
-    setNewItem('');
+    setNewItem("");
   };
 
   const handleToggle = (id: string) => {
@@ -50,7 +53,7 @@ export default function HomeScreen() {
   };
 
   const handleSignOut = () => {
-    router.replace('/sign-in');
+    router.replace("/sign-in");
   };
 
   return (
@@ -83,8 +86,14 @@ export default function HomeScreen() {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Pressable onPress={() => handleToggle(item.id)} style={styles.card}>
-            <View style={[styles.checkbox, item.checked && styles.checkboxChecked]} />
-            <Text style={[styles.itemText, item.checked && styles.itemTextChecked]}>{item.label}</Text>
+            <View
+              style={[styles.checkbox, item.checked && styles.checkboxChecked]}
+            />
+            <Text
+              style={[styles.itemText, item.checked && styles.itemTextChecked]}
+            >
+              {item.label}
+            </Text>
           </Pressable>
         )}
       />
@@ -95,61 +104,61 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f7ef',
+    backgroundColor: "#f4f7ef",
     padding: 16,
     gap: 14,
   },
   headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
-    fontWeight: '800',
-    color: '#1f3727',
+    fontWeight: "800",
+    color: "#1f3727",
   },
   subtitle: {
     marginTop: 2,
     fontSize: 14,
-    color: '#4d5f4f',
+    color: "#4d5f4f",
   },
   addRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#d6e2d5',
-    backgroundColor: '#ffffff',
+    borderColor: "#d6e2d5",
+    backgroundColor: "#ffffff",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
   },
   primaryButton: {
-    backgroundColor: '#2f7a43',
+    backgroundColor: "#2f7a43",
     borderRadius: 10,
     paddingHorizontal: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   primaryButtonText: {
-    color: '#ffffff',
+    color: "#ffffff",
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   secondaryButton: {
     borderWidth: 1,
-    borderColor: '#c8d8c8',
+    borderColor: "#c8d8c8",
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   secondaryButtonText: {
-    color: '#35593d',
-    fontWeight: '600',
+    color: "#35593d",
+    fontWeight: "600",
     fontSize: 13,
   },
   list: {
@@ -157,14 +166,14 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: '#d6e2d5',
+    borderColor: "#d6e2d5",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   checkbox: {
@@ -172,18 +181,18 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#7da683',
+    borderColor: "#7da683",
   },
   checkboxChecked: {
-    backgroundColor: '#2f7a43',
-    borderColor: '#2f7a43',
+    backgroundColor: "#2f7a43",
+    borderColor: "#2f7a43",
   },
   itemText: {
     fontSize: 16,
-    color: '#2c3f2e',
+    color: "#2c3f2e",
   },
   itemTextChecked: {
-    textDecorationLine: 'line-through',
-    color: '#8a9a8b',
+    textDecorationLine: "line-through",
+    color: "#8a9a8b",
   },
 });
