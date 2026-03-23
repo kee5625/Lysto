@@ -7,6 +7,7 @@ type QuantityStepperProps = {
   onIncrement: () => void;
   onDecrement: () => void;
   compact?: boolean;
+  itemLabel?: string;
 };
 
 export function QuantityStepper({
@@ -14,14 +15,16 @@ export function QuantityStepper({
   onIncrement,
   onDecrement,
   compact = false,
+  itemLabel,
 }: QuantityStepperProps) {
-  const buttonSize = compact ? 32 : 40;
+  const buttonSize = compact ? 32 : 34;
+  const labelPrefix = itemLabel ? `${itemLabel} quantity` : 'Quantity';
 
   return (
     <View style={styles.wrapper}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Decrease quantity"
+        accessibilityLabel={`Decrease ${labelPrefix}`}
         onPress={onDecrement}
         style={[styles.minusButton, { width: buttonSize, height: buttonSize }]}
       >
@@ -30,7 +33,7 @@ export function QuantityStepper({
       <Text style={[styles.quantityText, compact && styles.quantityTextCompact]}>{quantity}</Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Increase quantity"
+        accessibilityLabel={`Increase ${labelPrefix}`}
         onPress={onIncrement}
         style={[styles.plusButton, { width: buttonSize, height: buttonSize }]}
       >
@@ -64,7 +67,7 @@ const styles = StyleSheet.create({
   quantityText: {
     minWidth: 24,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: lystoColors.text,
   },

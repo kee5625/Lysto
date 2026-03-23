@@ -31,8 +31,10 @@ export function BottomNavBar({ activeTab }: BottomNavBarProps) {
         return (
           <Pressable
             key={tab.key}
-            accessibilityRole="button"
-            onPress={() => router.push(tab.href)}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={`${tab.label} tab`}
+            onPress={() => router.replace(tab.href)}
             style={[styles.tab, active && styles.tabActive]}
           >
             <MaterialIcons

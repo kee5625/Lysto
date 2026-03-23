@@ -13,13 +13,22 @@ export function ListItemRow({ item, onIncrement, onDecrement }: ListItemRowProps
   return (
     <View style={styles.row}>
       <View style={styles.main}>
-        <Image source={{ uri: item.imageUri }} style={styles.image} />
+        <Image
+          source={{ uri: item.imageUri }}
+          style={styles.image}
+          accessibilityLabel={`${item.name} image`}
+        />
         <View style={styles.copy}>
           <Text style={styles.name}>{item.name}</Text>
           <Text style={styles.meta}>{[item.note, item.unitLabel].filter(Boolean).join(' • ')}</Text>
         </View>
       </View>
-      <QuantityStepper quantity={item.quantity} onIncrement={onIncrement} onDecrement={onDecrement} />
+      <QuantityStepper
+        itemLabel={item.name}
+        quantity={item.quantity}
+        onIncrement={onIncrement}
+        onDecrement={onDecrement}
+      />
     </View>
   );
 }
@@ -38,8 +47,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     borderRadius: lystoRadius.sm,
     backgroundColor: lystoColors.surfaceContainer,
   },
@@ -48,12 +57,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   name: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '700',
     color: lystoColors.text,
   },
   meta: {
-    fontSize: 12,
+    fontSize: 11,
     color: lystoColors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 0.8,

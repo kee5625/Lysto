@@ -22,7 +22,11 @@ export function ProductCard({
   return (
     <View style={styles.card}>
       <View style={styles.imageWrap}>
-        <Image source={{ uri: product.imageUri }} style={styles.image} />
+        <Image
+          source={{ uri: product.imageUri }}
+          style={styles.image}
+          accessibilityLabel={`${product.name} image`}
+        />
       </View>
 
       <View style={styles.content}>
@@ -33,9 +37,21 @@ export function ProductCard({
       </View>
 
       {quantity > 0 ? (
-        <QuantityStepper compact quantity={quantity} onIncrement={onIncrement} onDecrement={onDecrement} />
+        <QuantityStepper
+          compact
+          itemLabel={product.name}
+          quantity={quantity}
+          onIncrement={onIncrement}
+          onDecrement={onDecrement}
+        />
       ) : (
-        <Pressable accessibilityRole="button" onPress={onAdd} style={styles.addButton}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Add ${product.name}`}
+          accessibilityHint="Adds one quantity to your list"
+          onPress={onAdd}
+          style={styles.addButton}
+        >
           <MaterialIcons name="add" size={18} color={lystoColors.white} />
           <Text style={styles.addButtonText}>Add</Text>
         </Pressable>

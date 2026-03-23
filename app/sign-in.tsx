@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AuthFormField } from '@/components/lysto';
 import { lystoColors, lystoRadius, lystoTypography } from '@/constants/lysto-theme';
-import { Link, router } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   Image,
@@ -62,7 +62,7 @@ export default function SignInScreen() {
       return;
     }
 
-    router.replace('/home');
+    router.replace('/splash' as Href);
   };
 
   return (
