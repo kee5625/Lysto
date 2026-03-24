@@ -1,104 +1,310 @@
-import { Link, router } from 'expo-router';
-import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { AuthFormField } from '@/components/lysto';
+import { lystoColors, lystoRadius, lystoTypography } from '@/constants/lysto-theme';
+import { Link, router, type Href } from 'expo-router';
+import { useMemo, useState } from 'react';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+
+type SignInForm = {
+  email: string;
+  password: string;
+};
+
+type SignInErrors = Partial<Record<keyof SignInForm, string>>;
+
+function validateSignIn(values: SignInForm): SignInErrors {
+  const errors: SignInErrors = {};
+
+  if (!values.email.trim()) {
+    errors.email = 'Email is required';
+  } else if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) {
+    errors.email = 'Enter a valid email address';
+  }
+
+  if (!values.password) {
+    errors.password = 'Password is required';
+  }
+
+  return errors;
+}
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { width } = useWindowDimensions();
+  const showDecorativeImages = width >= 960;
+
+  const [values, setValues] = useState<SignInForm>({
+    email: '',
+    password: '',
+  });
+  const [rememberMe, setRememberMe] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
+
+  const errors = useMemo(() => validateSignIn(values), [values]);
+
+  const handleChange = (key: keyof SignInForm, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleSignIn = () => {
-    router.replace('/home');
+    setSubmitted(true);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    router.replace('/splash' as Href);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.brandRow}>
-        <Image source={require('../assets/images/logo.jpg')} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.title}>Lysto</Text>
-      </View>
-      <Text style={styles.subtitle}>Sign in to start planning your groceries.</Text>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {showDecorativeImages ? (
+        <>
+          <Image
+            source={{
+              uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3cY6M9HbyvV0cYVh2vcBM-zM1Q4Ww43YBuVipPmPKIZ6uvlwtKS0ycR_mOg1nWl65wSOxci8GZLntkIVFmUBJw0zz_jb6RjglVfZ7H-mo17vHuWKBrDIxhdQGgsdAfD6JPRQj5S70XuJc2Zc6wrGseFXwYPDbXlfAec60AgnaW_yZ-jpidxbqolET-LnKxLWIhH7NJESol0yUjsM_5rx_Ae2l4aoruI2Oz_T1p94v6EdvuSloLGtqEPNmA_0AxJe4RtMqNnPmi5UM',
+            }}
+            style={[styles.floatingImage, styles.floatingImageLeft]}
+          />
+          <Image
+            source={{
+              uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCaFKAYlGJ3owEEO9kz2JVTcGaVEqpL31SMpgoAn8U1EDKnfROu4sNnNaafmYSftweVcFIewy7D-ZZt2KKQmzuPkDi9uUpJgNEEj5MipWxiGn210gL5F-QLLWNnTWPpUHaBUCF3kvuBxuPtqzE1IQCeexRoU2EQd5obW54tE4rhtE3A8MqBzvSt-jcks5wK8YZzK6JEkNk204r2oDO7z4ApT4IfTTj1a5UZbDf4R3CJ-m3vEXvSdPz9Om3LDiLMWj0Cji9aigHADBJ_',
+            }}
+            style={[styles.floatingImage, styles.floatingImageRight]}
+          />
+        </>
+      ) : null}
 
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-      />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.main}>
+          <View style={styles.hero}>
+            <Text style={styles.brandTitle}>Harvest &amp; Hearth</Text>
+            <Text style={styles.heroHeading}>Welcome back.</Text>
+            <Text style={styles.heroSubheading}>Step back into your curated pantry ritual.</Text>
+          </View>
 
-      <Pressable onPress={handleSignIn} style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>Sign In</Text>
-      </Pressable>
+          <View style={styles.formCard}>
+            <AuthFormField
+              label="Email Address"
+              icon="mail-outline"
+              value={values.email}
+              onChangeText={(text) => handleChange('email', text)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="hello@hearth.com"
+              error={submitted ? errors.email : undefined}
+            />
 
-      <Text style={styles.helperText}>
-        New here? <Link href="/sign-up" style={styles.link}>Create an account</Link>
-      </Text>
-    </View>
+            <AuthFormField
+              label="Password"
+              icon="lock-outline"
+              value={values.password}
+              onChangeText={(text) => handleChange('password', text)}
+              secureTextEntry
+              autoCapitalize="none"
+              placeholder="••••••••"
+              error={submitted ? errors.password : undefined}
+            />
+
+            <View style={styles.metaRow}>
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: rememberMe }}
+                onPress={() => setRememberMe((prev) => !prev)}
+                style={styles.rememberToggle}
+              >
+                <MaterialIcons
+                  name={rememberMe ? 'check-box' : 'check-box-outline-blank'}
+                  size={20}
+                  color={rememberMe ? lystoColors.primary : lystoColors.outline}
+                />
+                <Text style={styles.rememberText}>Remember me</Text>
+              </Pressable>
+
+              <Pressable accessibilityRole="button" style={styles.forgotButton}>
+                <Text style={styles.forgotText}>Forgot password?</Text>
+              </Pressable>
+            </View>
+
+            <Pressable accessibilityRole="button" onPress={handleSignIn} style={styles.ctaButton}>
+              <Text style={styles.ctaLabel}>Sign In</Text>
+            </Pressable>
+
+            <View style={styles.signupRow}>
+              <Text style={styles.signupText}>New to the hearth? </Text>
+              <Link href="/sign-up" style={styles.signupLink}>
+                Create account
+              </Link>
+            </View>
+          </View>
+
+          <View style={styles.footerMutedItems}>
+            <Text style={styles.footerMutedText}>Private pantry</Text>
+            <Text style={styles.footerDot}>•</Text>
+            <Text style={styles.footerMutedText}>Curated weekly</Text>
+            <Text style={styles.footerDot}>•</Text>
+            <Text style={styles.footerMutedText}>Soft reminders</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#f8eddb',
-    paddingHorizontal: 20,
+    backgroundColor: lystoColors.surfaceContainer,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-    gap: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 30,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#23402b',
+  main: {
+    width: '100%',
+    maxWidth: 510,
+    alignSelf: 'center',
+    gap: 20,
   },
-  brandRow: {
+  hero: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  brandTitle: {
+    color: lystoColors.primary,
+    fontSize: 38,
+    fontWeight: '600',
+    fontFamily: lystoTypography.brand,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  heroHeading: {
+    color: lystoColors.text,
+    fontSize: 30,
+    fontWeight: '700',
+  },
+  heroSubheading: {
+    color: lystoColors.textMuted,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  formCard: {
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: 'rgba(255, 255, 255, 0.48)',
+    padding: 22,
+    gap: 14,
+    shadowColor: '#42493c',
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 4,
+  },
+  metaRow: {
+    marginTop: 2,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 10,
   },
-  logo: {
-    width: 36,
-    height: 36,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#4b5f50',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d6e2d5',
-    backgroundColor: '#f8eddb',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-  },
-  primaryButton: {
-    backgroundColor: '#f8eddb',
-    borderRadius: 10,
-    paddingVertical: 12,
+  rememberToggle: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    gap: 6,
   },
-  primaryButtonText: {
-    color: '#2f7a43',
-    fontSize: 16,
+  rememberText: {
+    color: lystoColors.textMuted,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  forgotButton: {
+    paddingVertical: 2,
+  },
+  forgotText: {
+    color: lystoColors.primary,
+    fontSize: 13,
     fontWeight: '700',
   },
-  helperText: {
-    color: '#4b5f50',
+  ctaButton: {
+    marginTop: 6,
+    minHeight: 58,
+    borderRadius: lystoRadius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: lystoColors.primary,
+  },
+  ctaLabel: {
+    color: lystoColors.white,
+    fontSize: 19,
+    fontWeight: '700',
+  },
+  signupRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  signupText: {
+    color: lystoColors.textMuted,
     fontSize: 14,
   },
-  link: {
-    color: '#2f7a43',
+  signupLink: {
+    color: lystoColors.primary,
+    fontSize: 14,
     fontWeight: '700',
+  },
+  footerMutedItems: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 7,
+    opacity: 0.7,
+  },
+  footerMutedText: {
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    color: lystoColors.textMuted,
+  },
+  footerDot: {
+    fontSize: 10,
+    color: lystoColors.outline,
+  },
+  floatingImage: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    borderRadius: 24,
+    opacity: 0.25,
+  },
+  floatingImageLeft: {
+    left: 38,
+    top: 130,
+    transform: [{ rotate: '-8deg' }],
+  },
+  floatingImageRight: {
+    right: 42,
+    bottom: 90,
+    transform: [{ rotate: '7deg' }],
   },
 });
