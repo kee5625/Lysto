@@ -44,25 +44,12 @@ export default function SignInScreen() {
       console.error(JSON.stringify(error, null, 2))
       
       if (error.errors[0].code === 'form_identifier_not_found') {
-        try {
-          const { error: signUpError } = await signUp.password({
-            emailAddress,
-            password
-          })
-          
-          if (!signUpError) await signUp.verifications.sendEmailCode()
-          
-          if (
-            signUp.status === 'missing_requirements' &&
-            signUp.unverifiedFields.includes('email_address') &&
-            signUp.missingFields.length === 0
-          ) {
-            setShowEmailCode(true)
-            return
-          } 
-        } catch (err: unknown) {
-          console.error(JSON.stringify(err, null, 2))
-        }
+        // User doesn't have an account - redirect to sign-up with pre-filled email
+        router.replace({
+          pathname: '/sign-up',
+          params: { email: emailAddress, password: password }
+        })
+        return
       }
     }
     
