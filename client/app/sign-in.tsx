@@ -12,9 +12,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { ThemedView } from '@/components/themed-view';
+import { ThemedText } from '@/components/themed-text';
 
 export default function SignInScreen() {
   const { signIn, errors, fetchStatus } = useSignIn()
@@ -25,7 +28,7 @@ export default function SignInScreen() {
   
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
-  const [code, SetCode] = useState('')
+  const [code, setCode] = useState('')
   const [showEmailCode, setShowEmailCode] = useState(false)
   
   const [rememberMe, setRememberMe] = useState(true);
@@ -99,6 +102,149 @@ export default function SignInScreen() {
     setSubmitted(true);
     router.replace('/splash' as Href);
   };
+  
+  const handleVerify = async () => {
+    // Flow for signing up a new user
+    if (showEmailCode) {
+      const { error } = await signUp.verifications.verifyEmailCode({
+        code,
+      })
+      if (error) {
+        console.error(JSON.stringify(error, null, 2))
+        return
+      }
+
+      if (signUp.status === 'complete') {
+        await signUp.finalize({
+          navigate: async ({ session, decorateUrl }) => {
+            if (session?.currentTask) {
+              // Handle session tasks
+              // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+              console.log(session?.currentTask)
+              return
+            }
+
+            const url = decorateUrl('/')
+            if (url.startsWith('http')) {
+              window.location.href = url
+            } else {
+              router.push(url as Href)
+            }
+          },
+        })
+      } else {
+        // Check why the sign-up is not complete
+        console.error('Sign-up attempt not complete. Status:', signUp.status)
+      }
+    }
+
+    // Flow for signing in an existing user
+    const { error } = await signIn.mfa.verifyEmailCode({
+      code,
+    })
+    if (error) {
+      console.error(JSON.stringify(error, null, 2))
+      return
+    }
+
+    if (signIn.status === 'complete') {
+      await signIn.finalize({
+        navigate: async ({ session, decorateUrl }) => {
+          if (session?.currentTask) {
+            // Handle session tasks
+            // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+            console.log(session?.currentTask)
+            return
+          }
+
+          const url = decorateUrl('/')
+          if (url.startsWith('http')) {
+            window.location.href = url
+          } else {
+            router.push(url as Href)
+          }
+        },
+      })
+    } else {
+      // Check why the sign-in is not complete
+      console.error('Sign-in attempt not complete. Status:', signIn.status)
+    }
+  }
+
+  if (showEmailCode || signIn.status === 'needs_client_trust') {
+    return (
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.main}>
+            <View style={styles.hero}>
+              <Text style={styles.brandTitle}>Harvest &amp; Hearth</Text>
+              <Text style={styles.heroHeading}>Verify your account</Text>
+              <Text style={styles.heroSubheading}>
+                {showEmailCode ? 'Check your email for the verification code' : 'Enter the verification code sent to your email'}
+              </Text>
+            </View>
+
+            <View style={styles.formCard}>
+              <AuthFormField
+                label="Verification Code"
+                icon="confirmation-number"
+                value={code}
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                autoCapitalize="none"
+                placeholder="Enter 6-digit code"
+                error={submitted ? errors.fields.code?.message : undefined}
+              />
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleVerify}
+                style={({ pressed }) => [
+                  styles.ctaButton,
+                  (!code || fetchStatus === 'fetching') && styles.buttonDisabled,
+                  pressed && styles.buttonPressed,
+                ]}
+                disabled={!code || fetchStatus === 'fetching'}
+              >
+                <Text style={styles.ctaLabel}>Verify</Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => signIn.mfa.sendEmailCode()}
+                style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+              >
+                <Text style={styles.secondaryButtonText}>Resend code</Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => signIn.reset()}
+                style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+              >
+                <Text style={styles.secondaryButtonText}>Start over</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.footerMutedItems}>
+              <Text style={styles.footerMutedText}>Private pantry</Text>
+              <Text style={styles.footerDot}>•</Text>
+              <Text style={styles.footerMutedText}>Curated weekly</Text>
+              <Text style={styles.footerDot}>•</Text>
+              <Text style={styles.footerMutedText}>Soft reminders</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    )
+  }
 
   return (
     <KeyboardAvoidingView
