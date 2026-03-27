@@ -41,6 +41,7 @@ node_modules/
 .pnpm-store/
 .yarn/
 *.tsbuildinfo
+**/package-lock.json
 
 # Expo / React Native
 .expo/
