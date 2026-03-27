@@ -43,7 +43,7 @@ export default function SignInScreen() {
     if (error) {
       console.error(JSON.stringify(error, null, 2))
       
-      if (error.error[0].code === 'form_identifier_not_found') {
+      if (error.errors[0].code === 'form_identifier_not_found') {
         try {
           const { error: signUpError } = await signUp.password({
             emailAddress,
