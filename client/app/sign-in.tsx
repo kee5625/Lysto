@@ -23,7 +23,7 @@ export default function SignInScreen() {
   const { width } = useWindowDimensions();
   const showDecorativeImages = width >= 960;
   
-  const [email, setEmail] = useState('')
+  const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
   const [code, SetCode] = useState('')
   const [showEmailCode, setShowEmailCode] = useState(false)
@@ -33,16 +33,70 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     const { error } = await signIn.password({
-      email,
+      emailAddress,
       password,
     })
     
-    setSubmitted(true);
-
-    if (Object.keys(errors).length > 0) {
-      return;
+    if (error) {
+      console.error(JSON.stringify(error, null, 2))
+      
+      if (error.error[0].code === 'form_identifier_not_found') {
+        try {
+          const { error: signUpError } = await signUp.password({
+            emailAddress,
+            password
+          })
+          
+          if (!signUpError) await signUp.verifications.sendEmailCode()
+          
+          if (
+            signUp.status === 'missing_requirements' &&
+            signUp.unverifiedFields.includes('email_address') &&
+            signUp.missingFields.length === 0
+          ) {
+            setShowEmailCode(true)
+            return
+          } 
+        } catch (err: unknown) {
+          console.error(JSON.stringify(err, null, 2))
+        }
+      }
     }
+    
+    if (signIn.status === 'complete') {
+      await signIn.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) {
+            console.log(session?.currentTask)
+            return
+          }
+          
+          const url = decorateUrl('/')
+          if (url.startsWith('http')) {
+            window.location.href = url
+          } else {
+            router.push(url as Href)
+          }
+        },
+      })
+    } else if (signIn.status === 'needs_second_factor') {
+      // Handle MFA if required
+      // See https://clerk.com/docs/guides/development/custom-flows/authentication/multi-factor-authentication
+    } else if (signIn.status === 'needs_client_trust') {
+      // Handle Client Trust
+      // See https://clerk.com/docs/guides/development/custom-flows/authentication/client-trust
+      const emailCodeFactor = signIn.supportedSecondFactors.find(
+        (factor) => factor.strategy === 'email_code',
+      )
 
+      if (emailCodeFactor) {
+        await signIn.mfa.sendEmailCode()
+      }
+    } else {
+      // Check why the sign-in is not complete
+      console.error('Sign-in attempt not complete:', signIn)
+    }
+    setSubmitted(true);
     router.replace('/splash' as Href);
   };
 
