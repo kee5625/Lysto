@@ -3,6 +3,7 @@ import { AuthFormField } from '@/components/lysto';
 import { lystoColors, lystoRadius, lystoTypography } from '@/constants/lysto-theme';
 import { Link, router, type Href } from 'expo-router';
 import { useMemo, useState } from 'react';
+import {useSignIn, useSignUp} from '@clerk/expo'
 import {
   Image,
   KeyboardAvoidingView,
@@ -15,47 +16,27 @@ import {
   View,
 } from 'react-native';
 
-type SignInForm = {
-  email: string;
-  password: string;
-};
-
-type SignInErrors = Partial<Record<keyof SignInForm, string>>;
-
-function validateSignIn(values: SignInForm): SignInErrors {
-  const errors: SignInErrors = {};
-
-  if (!values.email.trim()) {
-    errors.email = 'Email is required';
-  } else if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) {
-    errors.email = 'Enter a valid email address';
-  }
-
-  if (!values.password) {
-    errors.password = 'Password is required';
-  }
-
-  return errors;
-}
-
 export default function SignInScreen() {
+  const { signIn, errors, fetchStatus } = useSignIn()
+  const { signUp } = useSignUp()
+
   const { width } = useWindowDimensions();
   const showDecorativeImages = width >= 960;
-
-  const [values, setValues] = useState<SignInForm>({
-    email: '',
-    password: '',
-  });
+  
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [code, SetCode] = useState('')
+  const [showEmailCode, setShowEmailCode] = useState(false)
+  
   const [rememberMe, setRememberMe] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  const errors = useMemo(() => validateSignIn(values), [values]);
-
-  const handleChange = (key: keyof SignInForm, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
+    const { error } = await signIn.password({
+      email,
+      password,
+    })
+    
     setSubmitted(true);
 
     if (Object.keys(errors).length > 0) {
