@@ -284,23 +284,23 @@ export default function SignInScreen() {
             <AuthFormField
               label="Email Address"
               icon="mail-outline"
-              value={values.email}
-              onChangeText={(text) => handleChange('email', text)}
+              value={emailAddress}
+              onChangeText={setEmailAddress}
               keyboardType="email-address"
               autoCapitalize="none"
               placeholder="hello@hearth.com"
-              error={submitted ? errors.email : undefined}
+              error={submitted ? errors.fields.emailAddress?.message : undefined}
             />
 
             <AuthFormField
               label="Password"
               icon="lock-outline"
-              value={values.password}
-              onChangeText={(text) => handleChange('password', text)}
+              value={password}
+              onChangeText={setPassword}
               secureTextEntry
               autoCapitalize="none"
               placeholder="••••••••"
-              error={submitted ? errors.password : undefined}
+              error={submitted ? errors.fields.password?.message : undefined}
             />
 
             <View style={styles.metaRow}>
