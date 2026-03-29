@@ -29,35 +29,35 @@ const editorialImages = [
 ] as const;
 
 function validateSignUp(values: SignUpForm): SignUpErrors {
-  const errors: SignUpErrors = {};
+  const formErrors: SignUpErrors = {};
 
   if (!values.fullName.trim()) {
-    errors.fullName = 'Full name is required';
+    formErrors.fullName = 'Full name is required';
   }
 
   if (!values.email.trim()) {
-    errors.email = 'Email is required';
+    formErrors.email = 'Email is required';
   } else if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) {
-    errors.email = 'Enter a valid email address';
+    formErrors.email = 'Enter a valid email address';
   }
 
   if (!values.password) {
-    errors.password = 'Password is required';
+    formErrors.password = 'Password is required';
   } else if (values.password.length < 6) {
-    errors.password = 'Use at least 6 characters';
+    formErrors.password = 'Use at least 6 characters';
   }
 
-  return errors;
+  return formErrors;
 }
 
 export default function SignUpScreen() {
-  const { signUp, isLoaded, errors: clerkErrors } = useSignUp();
-  const params = useLocalSearchParams<{ email?: string; password?: string }>();
+  const { signUp, isLoaded, errors: signUpErrors } = useSignUp();
+  const params = useLocalSearchParams<{ email?: string; reason?: string }>();
   
   const [values, setValues] = useState<SignUpForm>({
     fullName: '',
     email: params.email || '',
-    password: params.password || '',
+    password: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [showEmailCode, setShowEmailCode] = useState(false);
@@ -69,10 +69,7 @@ export default function SignUpScreen() {
     if (params.email) {
       setValues(prev => ({ ...prev, email: params.email || '' }));
     }
-    if (params.password) {
-      setValues(prev => ({ ...prev, password: params.password || '' }));
-    }
-  }, [params.email, params.password]);
+  }, [params.email]);
 
   const handleChange = (key: keyof SignUpForm, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -128,6 +125,11 @@ export default function SignUpScreen() {
             }
 
             const url = decorateUrl('/');
+            if (url.startsWith('http') && typeof window !== 'undefined') {
+              window.location.href = url;
+              return;
+            }
+
             router.replace(url);
           },
         });
@@ -165,7 +167,7 @@ export default function SignUpScreen() {
                 keyboardType="number-pad"
                 autoCapitalize="none"
                 placeholder="Enter 6-digit code"
-                error={errors?.fields?.emailAddress?.message}
+                error={submitted ? signUpErrors?.fields?.code?.message : undefined}
               />
 
               <Pressable accessibilityRole="button" onPress={handleVerify} style={styles.ctaButton}>
@@ -212,35 +214,46 @@ export default function SignUpScreen() {
             <Text style={styles.brandSubtitle}>Curate your kitchen sanctuary.</Text>
           </View>
 
-          <View style={styles.formCard}>
-            <AuthFormField
-              label="Full Name"
-              value={values.fullName}
-              onChangeText={(text) => handleChange('fullName', text)}
-              autoCapitalize="words"
-              placeholder="Enter your name"
-              error={validationErrors.fullName}
-            />
+           <View style={styles.formCard}>
+            {params.reason === 'no_account' ? (
+              <View style={styles.notice}>
+                <Text style={styles.noticeTitle}>No account found</Text>
+                <Text style={styles.noticeBody}>Create an account to continue.</Text>
+              </View>
+            ) : null}
 
-            <AuthFormField
-              label="Email Address"
-              value={values.email}
-              onChangeText={(text) => handleChange('email', text)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholder="hello@hearth.com"
-              error={errors?.fields?.emailAddress?.message}
-            />
+             <AuthFormField
+               label="Full Name"
+               value={values.fullName}
+               onChangeText={(text) => handleChange('fullName', text)}
+               autoCapitalize="words"
+               placeholder="Enter your name"
+               error={submitted ? validationErrors.fullName : undefined}
+             />
 
-            <AuthFormField
-              label="Password"
-              value={values.password}
-              onChangeText={(text) => handleChange('password', text)}
-              secureTextEntry
-              autoCapitalize="none"
-              placeholder="••••••••"
-              error={errors?.fields?.password?.message}
-            />
+             <AuthFormField
+               label="Email Address"
+               value={values.email}
+               onChangeText={(text) => handleChange('email', text)}
+               keyboardType="email-address"
+               autoCapitalize="none"
+               placeholder="hello@hearth.com"
+               error={
+                 submitted
+                   ? validationErrors.email ?? signUpErrors?.fields?.emailAddress?.message
+                   : undefined
+               }
+             />
+
+             <AuthFormField
+               label="Password"
+               value={values.password}
+               onChangeText={(text) => handleChange('password', text)}
+               secureTextEntry
+               autoCapitalize="none"
+               placeholder="••••••••"
+               error={submitted ? validationErrors.password ?? signUpErrors?.fields?.password?.message : undefined}
+             />
 
             <Pressable accessibilityRole="button" onPress={handleSignUp} style={styles.ctaButton}>
               <Text style={styles.ctaLabel}>Create Account</Text>
@@ -319,6 +332,25 @@ const styles = StyleSheet.create({
     padding: 22,
     gap: 14,
     ...lystoShadows.card,
+  },
+  notice: {
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(240, 246, 232, 1)',
+    borderWidth: 1,
+    borderColor: 'rgba(193, 201, 185, 0.55)',
+  },
+  noticeTitle: {
+    color: lystoColors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  noticeBody: {
+    marginTop: 2,
+    color: lystoColors.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
   },
   ctaButton: {
     marginTop: 6,
