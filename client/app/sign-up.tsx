@@ -51,7 +51,7 @@ function validateSignUp(values: SignUpForm): SignUpErrors {
 }
 
 export default function SignUpScreen() {
-  const { signUp, isLoaded, errors: signUpErrors } = useSignUp();
+  const { signUp, errors: signUpErrors } = useSignUp();
   const params = useLocalSearchParams<{ email?: string; reason?: string }>();
   
   const [values, setValues] = useState<SignUpForm>({
@@ -78,7 +78,7 @@ export default function SignUpScreen() {
   const handleSignUp = async () => {
     setSubmitted(true);
 
-    if (Object.keys(validationErrors).length > 0 || !isLoaded) {
+    if (Object.keys(validationErrors).length > 0 || !signUp) {
       return;
     }
 
@@ -104,7 +104,7 @@ export default function SignUpScreen() {
   };
 
   const handleVerify = async () => {
-    if (!isLoaded) return;
+    if (!signUp) return;
 
     try {
       const { error } = await signUp.verifications.verifyEmailCode({
@@ -125,12 +125,13 @@ export default function SignUpScreen() {
             }
 
             const url = decorateUrl('/');
-            if (url.startsWith('http') && typeof window !== 'undefined') {
+            
+            if (typeof window !== 'undefined' && url.startsWith('http')) {
               window.location.href = url;
               return;
             }
 
-            router.replace(url);
+            router.replace('/');
           },
         });
       }
