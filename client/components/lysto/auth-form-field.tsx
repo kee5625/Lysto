@@ -2,17 +2,22 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
 import { lystoColors, lystoRadius } from '@/constants/lysto-theme';
 
+type FieldErrorLike = string | { message?: string } | null | undefined;
+
 type AuthFormFieldProps = TextInputProps & {
   label: string;
   icon?: keyof typeof MaterialIcons.glyphMap;
-  error?: string;
+  error?: FieldErrorLike;
 };
 
 export function AuthFormField({ label, icon, error, ...textInputProps }: AuthFormFieldProps) {
+  const errorText =
+    typeof error === 'string' ? error : (error && typeof error.message === 'string' ? error.message : undefined);
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputWrap, !!error && styles.inputWrapError]}>
+      <View style={[styles.inputWrap, !!errorText && styles.inputWrapError]}>
         {icon ? <MaterialIcons name={icon} size={20} color={lystoColors.textMuted} /> : null}
         <TextInput
           placeholderTextColor="rgba(114, 121, 107, 0.7)"
@@ -21,10 +26,11 @@ export function AuthFormField({ label, icon, error, ...textInputProps }: AuthFor
           {...textInputProps}
         />
       </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {errorText ? <Text style={styles.errorText}>{errorText}</Text> : null}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   wrap: {

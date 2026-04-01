@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 
 export default function SignInScreen() {
-  const { signIn, isLoaded, errors, fetchStatus } = useSignIn();
+  const { signIn, errors, fetchStatus } = useSignIn();
 
   const { width } = useWindowDimensions();
   const showDecorativeImages = width >= 960;
@@ -33,9 +33,9 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     setSubmitted(true);
-
-    if (!isLoaded) return;
-
+    
+    if (!signIn) return;
+    
     const { error } = await signIn.password({
       emailAddress,
       password,
@@ -44,7 +44,7 @@ export default function SignInScreen() {
     if (error) {
       console.error(JSON.stringify(error, null, 2));
       
-      if (error.errors?.[0]?.code === 'form_identifier_not_found') {
+      if (error.code === 'form_identifier_not_found') {
         // User doesn't have an account - redirect to sign-up with pre-filled email
         router.replace({
           pathname: '/sign-up',
@@ -93,8 +93,8 @@ export default function SignInScreen() {
   const handleVerify = async () => {
     setSubmitted(true);
 
-    if (!isLoaded) return;
-
+    if (!signIn) return;
+    
     const { error } = await signIn.mfa.verifyEmailCode({
       code,
     })
@@ -238,16 +238,17 @@ export default function SignInScreen() {
           </View>
 
           <View style={styles.formCard}>
-             <AuthFormField
-               label="Email Address"
-               icon="mail-outline"
-               value={emailAddress}
-               onChangeText={setEmailAddress}
-               keyboardType="email-address"
-               autoCapitalize="none"
-               placeholder="hello@hearth.com"
-               error={submitted ? errors?.fields?.emailAddress?.message : undefined}
-             />
+            <AuthFormField
+              label="Email Address"
+              icon="mail-outline"
+              value={emailAddress}
+              onChangeText={setEmailAddress}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="hello@hearth.com"
+              error={submitted ? errors?.fields?.identifier?.message : undefined}
+            />
+
 
              <AuthFormField
                label="Password"
