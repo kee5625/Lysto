@@ -445,4 +445,26 @@ const styles = StyleSheet.create({
     bottom: 90,
     transform: [{ rotate: '7deg' }],
   },
+  buttonDisabled: {
+    opacity: 0.55,
+  },
+  buttonPressed: {
+    opacity: 0.88,
+  },
+  secondaryButton: {
+    minHeight: 48,
+    borderRadius: lystoRadius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: lystoColors.outline,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    paddingHorizontal: 16,
+  },
+  secondaryButtonText: {
+    color: lystoColors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
 });
