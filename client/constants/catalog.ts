@@ -9,7 +9,7 @@ export type Product = {
   note?: string;
 };
 
-export const categories: Array<{ key: CategoryKey; label: string }> = [
+export const categories: { key: CategoryKey; label: string }[] = [
   { key: 'vegetables', label: 'Vegetables' },
   { key: 'fruits', label: 'Fruits' },
   { key: 'dairy', label: 'Dairy' },

@@ -2,7 +2,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { AuthFormField } from '@/components/lysto';
 import { lystoColors, lystoRadius, lystoTypography } from '@/constants/lysto-theme';
 import { Link, router, type Href } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { useSignIn } from '@clerk/expo';
 import {
   Image,
   KeyboardAvoidingView,
@@ -15,55 +16,192 @@ import {
   View,
 } from 'react-native';
 
-type SignInForm = {
-  email: string;
-  password: string;
-};
-
-type SignInErrors = Partial<Record<keyof SignInForm, string>>;
-
-function validateSignIn(values: SignInForm): SignInErrors {
-  const errors: SignInErrors = {};
-
-  if (!values.email.trim()) {
-    errors.email = 'Email is required';
-  } else if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) {
-    errors.email = 'Enter a valid email address';
-  }
-
-  if (!values.password) {
-    errors.password = 'Password is required';
-  }
-
-  return errors;
-}
-
 export default function SignInScreen() {
+  const { signIn, errors, fetchStatus } = useSignIn();
+
   const { width } = useWindowDimensions();
   const showDecorativeImages = width >= 960;
-
-  const [values, setValues] = useState<SignInForm>({
-    email: '',
-    password: '',
-  });
+  
+  const [emailAddress, setEmailAddress] = useState('')
+  const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  
   const [rememberMe, setRememberMe] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  const errors = useMemo(() => validateSignIn(values), [values]);
+  const needsEmailCode = signIn?.status === 'needs_client_trust' || signIn?.status === 'needs_second_factor';
 
-  const handleChange = (key: keyof SignInForm, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     setSubmitted(true);
+    
+    if (!signIn) return;
+    
+    const { error } = await signIn.password({
+      emailAddress,
+      password,
+    });
+     
+    if (error) {
+      console.error(JSON.stringify(error, null, 2));
+      
+      if (error.code === 'form_identifier_not_found') {
+        // User doesn't have an account - redirect to sign-up with pre-filled email
+        router.replace({
+          pathname: '/sign-up',
+          params: { email: emailAddress, reason: 'no_account' },
+        });
+        return;
+      }
 
-    if (Object.keys(errors).length > 0) {
+      return;
+    }
+     
+    if (signIn.status === 'complete') {
+      await signIn.finalize({
+        navigate: ({ session, decorateUrl }) => {
+          if (session?.currentTask) {
+            console.log(session?.currentTask);
+            return;
+          }
+           
+          const url = decorateUrl('/');
+          if (url.startsWith('http') && typeof window !== 'undefined') {
+            window.location.href = url;
+            return;
+          }
+
+          router.replace(url as Href);
+        },
+      });
       return;
     }
 
-    router.replace('/splash' as Href);
+    if (signIn.status === 'needs_second_factor' || signIn.status === 'needs_client_trust') {
+      const emailCodeFactor = signIn.supportedSecondFactors.find(
+        (factor) => factor.strategy === 'email_code',
+      )
+
+      if (emailCodeFactor) {
+        await signIn.mfa.sendEmailCode();
+      }
+    }
+
+    // Check why the sign-in is not complete
+    console.error('Sign-in attempt not complete. Status:', signIn.status);
   };
+  
+  const handleVerify = async () => {
+    setSubmitted(true);
+
+    if (!signIn) return;
+    
+    const { error } = await signIn.mfa.verifyEmailCode({
+      code,
+    })
+    if (error) {
+      console.error(JSON.stringify(error, null, 2))
+      return
+    }
+
+    if (signIn.status === 'complete') {
+      await signIn.finalize({
+        navigate: async ({ session, decorateUrl }) => {
+          if (session?.currentTask) {
+            // Handle session tasks
+            // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+            console.log(session?.currentTask)
+            return
+          }
+
+          const url = decorateUrl('/');
+          if (url.startsWith('http') && typeof window !== 'undefined') {
+            window.location.href = url;
+            return;
+          }
+
+          router.replace(url as Href);
+        },
+      })
+    } else {
+      // Check why the sign-in is not complete
+      console.error('Sign-in attempt not complete. Status:', signIn.status)
+    }
+  }
+
+  if (needsEmailCode) {
+    return (
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.main}>
+            <View style={styles.hero}>
+              <Text style={styles.brandTitle}>Harvest &amp; Hearth</Text>
+              <Text style={styles.heroHeading}>Verify your account</Text>
+              <Text style={styles.heroSubheading}>
+                Enter the verification code sent to your email
+              </Text>
+            </View>
+
+            <View style={styles.formCard}>
+                <AuthFormField
+                  label="Verification Code"
+                  icon="confirmation-number"
+                  value={code}
+                  onChangeText={setCode}
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                  placeholder="Enter 6-digit code"
+                  error={submitted ? errors?.fields?.code?.message : undefined}
+                />
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleVerify}
+                style={({ pressed }) => [
+                  styles.ctaButton,
+                  (!code || fetchStatus === 'fetching') && styles.buttonDisabled,
+                  pressed && styles.buttonPressed,
+                ]}
+                disabled={!code || fetchStatus === 'fetching'}
+              >
+                <Text style={styles.ctaLabel}>Verify</Text>
+              </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => signIn.mfa.sendEmailCode()}
+                  style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+                >
+                  <Text style={styles.secondaryButtonText}>Resend code</Text>
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => signIn.reset()}
+                  style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+                >
+                  <Text style={styles.secondaryButtonText}>Start over</Text>
+                </Pressable>
+            </View>
+
+            <View style={styles.footerMutedItems}>
+              <Text style={styles.footerMutedText}>Private pantry</Text>
+              <Text style={styles.footerDot}>•</Text>
+              <Text style={styles.footerMutedText}>Curated weekly</Text>
+              <Text style={styles.footerDot}>•</Text>
+              <Text style={styles.footerMutedText}>Soft reminders</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    )
+  }
 
   return (
     <KeyboardAvoidingView
@@ -103,24 +241,25 @@ export default function SignInScreen() {
             <AuthFormField
               label="Email Address"
               icon="mail-outline"
-              value={values.email}
-              onChangeText={(text) => handleChange('email', text)}
+              value={emailAddress}
+              onChangeText={setEmailAddress}
               keyboardType="email-address"
               autoCapitalize="none"
               placeholder="hello@hearth.com"
-              error={submitted ? errors.email : undefined}
+              error={submitted ? errors?.fields?.identifier?.message : undefined}
             />
 
-            <AuthFormField
-              label="Password"
-              icon="lock-outline"
-              value={values.password}
-              onChangeText={(text) => handleChange('password', text)}
-              secureTextEntry
-              autoCapitalize="none"
-              placeholder="••••••••"
-              error={submitted ? errors.password : undefined}
-            />
+
+             <AuthFormField
+               label="Password"
+               icon="lock-outline"
+               value={password}
+               onChangeText={setPassword}
+               secureTextEntry
+               autoCapitalize="none"
+               placeholder="••••••••"
+               error={submitted ? errors?.fields?.password?.message : undefined}
+             />
 
             <View style={styles.metaRow}>
               <Pressable
@@ -307,4 +446,26 @@ const styles = StyleSheet.create({
     bottom: 90,
     transform: [{ rotate: '7deg' }],
   },
+  buttonDisabled: {
+    opacity: 0.55,
+  },
+  buttonPressed: {
+    opacity: 0.88,
+  },
+  secondaryButton: {
+    minHeight: 48,
+    borderRadius: lystoRadius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: lystoColors.outline,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    paddingHorizontal: 16,
+  },
+  secondaryButtonText: {
+    color: lystoColors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
 });
